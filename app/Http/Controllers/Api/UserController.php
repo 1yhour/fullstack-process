@@ -25,9 +25,30 @@ class UserController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(StoreUserRequest $request)
     {
-        // Not used in API resource routes
+        try{
+            $validate = $request->validated();
+            $user = User::create([
+                "name" => $validate["name"],
+                "email" => $validate["email"],
+                "password" => Hash::make($validate["password"])
+            ]);
+            return response()->json(
+                [
+                    "success" => true,
+                    "message" => "Successful Create User"
+                ],201
+            );
+        }catch(\Throwable $e){
+            Log::error("Failed to Create User: " . $e->getMessage());
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => "Error",
+                ], 401
+            );
+        }
     }
 
     /**
@@ -35,33 +56,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        try{
-            $validate = $request->validated();
-            
-            // It's best to use User::create() statically here
-            $user = User::create([
-                "name" => $validate["name"],
-                "email" => $validate["email"],
-                "password" => Hash::make($validate["password"])
-            ]);
-            
-            return response()->json(
-                [
-                    "success" => true,
-                    "message" => "Successful Create User",
-                    "data" => new UserResource($user)
-                ],201
-            );
-        }catch(\Throwable $e){
-            // Fixed typo 'erorr' to 'error', and 'message()' to 'getMessage()'
-            Log::error("Failed to Create User: " . $e->getMessage());
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => "Error",
-                ], 500 // 500 is the correct code for server errors
-            );
-        }
+        
     }
 
     /**
@@ -69,23 +64,32 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //
+        return response()->json(
+            [
+                "success" => true,
+                "message" => "Successful Get User",
+                "data" => new UserResource($user)
+            ], 200
+        );
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(User $user)
-    {
-        //
-    }
-
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        //
+        $validated = $request->validated();
+        $request->whenFilled("password", function($password) use (&$validated){
+            $validated["password"] = Hash::make($password);
+        });
+        $user->update($validated);
+        
+        return response()->json(
+            [
+                "success" => true,
+                "message" => "Successfully updated the user",
+                "data" => new UserResource($user)
+            ], 200
+        );
     }
 
     /**
