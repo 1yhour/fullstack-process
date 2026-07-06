@@ -10,7 +10,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\DB;
 class UserController extends Controller
 {
     /**
@@ -18,45 +18,40 @@ class UserController extends Controller
      */
     public function index()
     {
-        $user = User::all();
-        return UserResource::collection($user);
+        $users = User::latest()->paginate(15);
+        return response()->json(
+            [
+                "success" => true,
+                "message" => "Successfully fetched users",
+                "data" => UserResource::collection($users)
+            ], 200
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(StoreUserRequest $request)
+    public function store(StoreUserRequest $request)
     {
         try{
-            $validate = $request->validated();
-            $user = User::create([
-                "name" => $validate["name"],
-                "email" => $validate["email"],
-                "password" => Hash::make($validate["password"])
-            ]);
+            $validated = $request->validated();
+            $validated['password'] = Hash::make($validated['password']);
+            $user = DB::transaction(function() use ($validated){
+                return User::create($validated);
+            });
             return response()->json(
                 [
                     "success" => true,
-                    "message" => "Successful Create User"
-                ],201
+                    "message" => "Successfully create user",
+                    "data" => new UserResource($user)
+                ], 201
             );
         }catch(\Throwable $e){
-            Log::error("Failed to Create User: " . $e->getMessage());
+            Log::error("Failed to create the user" . $e->getMessage());
             return response()->json(
                 [
                     "success" => false,
-                    "message" => "Error",
-                ], 401
+                    "message" => "Internal server error",
+                ], 500
             );
         }
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreUserRequest $request)
-    {
-        
     }
 
     /**
