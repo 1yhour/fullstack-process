@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\UserResource;
+use App\Http\Requests\LoginRequest;
 class AuthController extends Controller
 {
     public function register(RegisterRequest $request): JsonResponse
@@ -29,4 +30,27 @@ class AuthController extends Controller
             "token"=> $token
         ], 201);
     } 
+    
+    public function login(LoginRequest $request): JsonResponse
+    {
+        $credentials = $request->validated();
+        $guard = auth('api');
+        if(!$token = $guard->attempt($credentials)){
+            return response()->json([
+                "success" => false,
+                "message" => "Invalid email or password",
+            ], 401);
+        }
+        return response()->json(
+            [
+                "success"=> true,
+                "message"=> "Successfully login",
+                "data"=> [
+                    "user"=>new UserResource($guard->user()),
+                    "access_token" => $token,
+                    "token_type" => "Bearer",
+                ]
+            ]
+        , 200);
+    }
 }
