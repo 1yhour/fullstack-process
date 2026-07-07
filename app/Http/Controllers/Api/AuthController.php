@@ -53,4 +53,31 @@ class AuthController extends Controller
             ]
         , 200);
     }
+    public function logout(){
+        auth()->logout();
+        return response()->json(
+            [
+                "success" => true,
+                "message" => "Successfully logout",
+            ], 200
+        );
+    }
+    public function me(){
+        $user = auth()->user();
+        return response()->json(
+            [
+                "success" => true,
+                "message" => "Successfully get user",
+                "data" => new UserResource($user)
+            ], 200
+        );
+    }
+    public function refresh(){
+        $newToken = auth()->refresh();
+        return response()->json([
+            "success" => true,
+            "message" => "Token refreshed successfully",
+            "access_token" => $newToken,
+        ], 200);
+    }
 }
