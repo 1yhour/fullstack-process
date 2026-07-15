@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
-
-#[Fillable(['name', 'email', 'password'])]
+use Illuminate\Database\Eloquent\Relations\HasMany;
+#[Fillable(['name', 'email', 'password', 'role'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements JWTSubject
 {
@@ -23,6 +23,11 @@ class User extends Authenticatable implements JWTSubject
      *
      * @return array<string, string>
      */
+
+    public function products(): HasMany {
+        return $this->hasMany(Product::class);
+    }
+    
     protected function casts(): array
     {
         return [
