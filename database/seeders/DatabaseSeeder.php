@@ -5,7 +5,8 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-
+use App\Models\Category;
+use App\Models\Product;
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
@@ -29,6 +30,11 @@ class DatabaseSeeder extends Seeder
             "password" => Hash::make("123456789"),
             "role"=>"admin"
         ]);
-
+        
+        $this->call([
+            CategorySeeder::class,
+            ProductSeeder::class
+            
+        ]);
     }
 }
