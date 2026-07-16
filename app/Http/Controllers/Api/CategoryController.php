@@ -21,7 +21,7 @@ class CategoryController extends Controller
         return response()->json([
             "success"=> true,
             "message"=> "Successfully fetched categories",
-            "data" => CategoryResource::collec($category)
+            "data" => CategoryResource::collection($category)
         ], 200);
     }
 
@@ -61,15 +61,11 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Category $category)
-    {
-        //
+        return response()->json([
+            "success" => true,
+            "message" => "Successfully fetched category",
+            "data" => new CategoryResource($category)
+        ], 200);
     }
 
     /**
@@ -77,7 +73,27 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, Category $category)
     {
-        //
+        try{
+            $validated = $request->validated();
+            DB::transaction(function () use ($validated, $category){
+                return $category->update($validated);
+            });
+            return response()->json(
+                [
+                    "success" => true,
+                    "message" => "Category Updated",
+                    "data" => new CategoryResource($category)
+                ],200
+            );
+        }catch(Throwable $e){
+            Log::error("Failed to Update Category");
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => "Failed to Update",
+                ],500
+            );
+        }
     }
 
     /**
@@ -85,6 +101,16 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+        $cate = Category::findOrFail($category->id);
+        
+        DB::transaction(function() use ($cate){
+            return $cate->delete();
+        });
+        return response()->json(
+            [
+                "success" => true,
+                "message" => "Category Deleted",
+            ],200
+        );
     }
 }

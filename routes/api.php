@@ -16,6 +16,7 @@ Route::prefix('auth')->group(function(){
         Route::get('me', [AuthController::class, 'me']);          
         Route::post('refresh', [AuthController::class, 'refresh']);
         Route::post('logout', [AuthController::class, 'logout']);   
+        Route::apiResource('products', ProductController::class);
     });
 });
 // Route::apiResource('users', UserController::class);
@@ -23,6 +24,7 @@ Route::prefix('auth')->group(function(){
 Route::middleware(['auth:api', 'admin'])->prefix('admin')->group(function(){
 
    Route::apiResource('users', UserController::class);
+   
 });
 
 Route::apiResource('products', ProductController::class);

@@ -60,23 +60,41 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        //
+        return response()->json(
+            [
+                "success" => true,
+                "message" => "Successfully get the products",
+                "data" => new ProductResource($product)
+            ], 200
+        );
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Product $product)
-    {
-        //
-    }
-
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        //
+        try{
+            $validated = $request->validated();
+            DB::transaction(function() use ($validated, $product){
+                return $product->update($validated);
+            });
+            
+            return response()->json(
+                [
+                    "success" => true,
+                    "message" => "Product Updated",
+                    "data" => new ProductResource($product)
+                ],200
+            );
+        }catch(Throwable $e){
+            Log::error("Failed to update the product" . $e->getMessage());
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => "Failed to update product",
+                ], 500
+            );
+        }
     }
 
     /**
@@ -84,6 +102,24 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        //
+        try{
+            DB::transaction(function() use ($product){
+                return $product->delete();
+            });
+            return response()->json(
+                [
+                    "success" => true,
+                    "message" => "Successfully deleted the product",
+                ], 200
+            );
+        }catch(Exception $e){
+            Log::error($e->getMessage());
+            return response()->json(
+                [
+                    "success" => false,
+                    "message" => "Failed to delete the product",
+                ], 500
+            );
+        }
     }
 }
