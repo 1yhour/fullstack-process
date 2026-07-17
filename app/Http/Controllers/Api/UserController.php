@@ -11,6 +11,7 @@ use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 class UserController extends Controller
 {
     /**
@@ -72,6 +73,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
+        Gate::authorize('update',$user);
         $validated = $request->validated();
         $request->whenFilled("password", function($password) use (&$validated){
             $validated["password"] = Hash::make($password);

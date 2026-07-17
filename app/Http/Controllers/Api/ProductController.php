@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Http\Resources\ProductResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Gate;
 use Exception;
 class ProductController extends Controller
 {
@@ -74,6 +75,7 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, Product $product)
     {
         try{
+            
             $validated = $request->validated();
             DB::transaction(function() use ($validated, $product){
                 return $product->update($validated);

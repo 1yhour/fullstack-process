@@ -21,12 +21,13 @@ Route::prefix('auth')->group(function(){
 });
 // Route::apiResource('users', UserController::class);
 
-Route::middleware(['auth:api', 'admin'])->prefix('admin')->group(function(){
+Route::middleware(['auth:api'])->prefix('admin')->group(function(){
 
    Route::apiResource('users', UserController::class);
    
 });
-
-Route::apiResource('products', ProductController::class);
-
-Route::apiResource('categories', CategoryController::class);
+Route::middleware('auth:api')->group(function () {
+    Route::apiResource('users', UserController::class);
+    Route::apiResource('products', ProductController::class);
+    Route::apiResource('categories', CategoryController::class);
+});
