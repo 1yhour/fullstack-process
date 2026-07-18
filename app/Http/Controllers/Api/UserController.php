@@ -11,14 +11,13 @@ use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
+        Gate::authorize('viewAny', User::class);
         $users = User::latest()->paginate(15);
         return response()->json(
             [
@@ -31,6 +30,7 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request)
     {
+        Gate::authorize('create', User::class);
         try{
             $validated = $request->validated();
             $validated['password'] = Hash::make($validated['password']);
@@ -60,6 +60,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        Gate::authorize('view', $user);
         return response()->json(
             [
                 "success" => true,
@@ -94,6 +95,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        Gate::authorize('delete', $user);
         $user->delete();
         return response()->json(
             [
