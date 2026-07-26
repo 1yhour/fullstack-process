@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
@@ -11,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Gate;
 use Exception;
+use App\Contracts\Notifier;
 class ProductController extends Controller
 {
     /**
@@ -123,5 +123,12 @@ class ProductController extends Controller
                 ], 500
             );
         }
+    }
+
+    public function __construct(protected Notifier $notifier) {}
+
+    public function getNotifier()
+    {
+        $this->notifier->send("helo");
     }
 }
