@@ -31,5 +31,6 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('products', ProductController::class);
     Route::apiResource('categories', CategoryController::class);
 });
-
-Route::get('/test-notifier', [ProductController::class, 'getNotifier']);
+Route::prefix('test')->group(function(){
+    Route::get('/test-notifier', [ProductController::class, 'getNotifier']);
+});

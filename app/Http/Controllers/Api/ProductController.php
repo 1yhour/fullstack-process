@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Gate;
 use Exception;
 use App\Contracts\Notifier;
+use App\Contracts\SmsNotifier;
 class ProductController extends Controller
 {
     /**
@@ -125,10 +126,24 @@ class ProductController extends Controller
         }
     }
 
-    public function __construct(protected Notifier $notifier) {}
-
+    public function __construct(protected Notifier $notifier, protected SmsNotifier $smsNotifier) {}
+    
     public function getNotifier()
-    {
+    {   
+        $arrNum = collect([1,3,3,6,3,5,7,99,0,5,14,22]);
         $this->notifier->send("helo");
+        $this->smsNotifier->sendSms('hello world');
+        $sum = $this->notifier->calculateSum(1,2);
+        $map = $this->notifier->filterNum($arrNum->toArray());
+        Log::info($map);
+        Log::info($sum);
+        return response()->json(
+            [
+                "success" => true,
+                "message" => "Successfully get the notifier",
+                "data" => $sum,
+            ], 200
+        );
     }
+    
 }

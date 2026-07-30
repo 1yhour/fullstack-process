@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Events\UserRegistered;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -34,7 +35,10 @@ class UserController extends Controller
             $validated = $request->validated();
             $validated['password'] = Hash::make($validated['password']);
             $user = DB::transaction(function() use ($validated){
-                return User::create($validated);
+                $user = User::create($validated);
+                UserRegistered::dispatch($user);
+                Log::info("User created successfully: " . $user->email);
+                return $user;
             });
             return response()->json(
                 [
