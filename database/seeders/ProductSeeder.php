@@ -13,5 +13,13 @@ class ProductSeeder extends Seeder
     public function run(): void
     {
         Product::factory(10)->create();
+        Product::create(
+            [
+                'name' => 'Welcome Coupon',
+                'price' => 100,
+                'category_id' => 2,
+                'user_id' => 1,
+            ]
+        );
     }   
 }

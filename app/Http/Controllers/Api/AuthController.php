@@ -13,7 +13,8 @@ use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\UserResource;
 use App\Http\Requests\LoginRequest;
-use App\Events\UserRegistered;
+use App\Events\UserNotify;
+use App\Models\Product;
 class AuthController extends Controller
 {
     public function register(RegisterRequest $request): JsonResponse
@@ -23,8 +24,8 @@ class AuthController extends Controller
         $user = DB::transaction(function() use ($data){
             return User::create($data);
         });
-        
-        UserRegistered::dispatch($user);
+        $welcomeCoupon = Product::where('name', 'Welcome Coupon')->first();
+        UserNotify::dispatch($user, $welcomeCoupon);
         $token = JWTAuth::fromUser($user);
         return response()->json([
             "success"=> true,

@@ -7,6 +7,8 @@ use App\Contracts\Notifier;
 use App\Services\EmailNotifier;
 use App\Contracts\SmsNotifier;
 use App\Services\SmsNotify;
+use App\Services\UserNotify;
+use App\Contracts\UserNotifier;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -16,6 +18,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(Notifier::class, EmailNotifier::class);
         $this->app->bind(SmsNotifier::class, SmsNotify::class);
+        $this->app->bind(UserNotifier::class, UserNotify::class);
     }
 
     /**
