@@ -10,23 +10,20 @@ use App\Http\Resources\CategoryResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use App\Traits\ApiResponseTrait;
 class CategoryController extends Controller
 {
+    use ApiResponseTrait;
+    
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $category = Category::latest()->paginate(10);
-        return response()->json([
-            "success"=> true,
-            "message"=> "Successfully fetched categories",
-            "data" => CategoryResource::collection($category)
-        ], 200);
+        $categoryCollection = CategoryResource::collection($category);
+        return $this->successResponse("Successfully fetched categories", $categoryCollection);
     }
-
-
-
     /**
      * Store a newly created resource in storage.
      */
@@ -37,21 +34,10 @@ class CategoryController extends Controller
             $category = DB::transaction(function() use ($validated){
                 return Category::create($validated);
             });
-            return response()->json(
-            [
-                "success"=> true,
-                "message"=> "Successfully created category",
-                "data" => new CategoryResource($category)
-            ], 201
-        );
+            return $this->successResponse("Successfully created category", new CategoryResource($category), 201);
         }catch(Exception $e){
             Log::error("Failed to create the category" . $e->getMessage());
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => "Failed to create category",
-                ], 500
-            );
+            return $this->errorResponse("Failed to create category", 500);
         }
         
     }
@@ -61,11 +47,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        return response()->json([
-            "success" => true,
-            "message" => "Successfully fetched category",
-            "data" => new CategoryResource($category)
-        ], 200);
+        return $this->successResponse("Successfully fetched category", new CategoryResource($category));
     }
 
     /**
@@ -78,21 +60,10 @@ class CategoryController extends Controller
             DB::transaction(function () use ($validated, $category){
                 return $category->update($validated);
             });
-            return response()->json(
-                [
-                    "success" => true,
-                    "message" => "Category Updated",
-                    "data" => new CategoryResource($category)
-                ],200
-            );
+            return $this->successResponse("Category Updated", new CategoryResource($category));
         }catch(Throwable $e){
             Log::error("Failed to Update Category");
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => "Failed to Update",
-                ],500
-            );
+            return $this->errorResponse("Failed to Update Category", 500);
         }
     }
 
@@ -102,15 +73,9 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $cate = Category::findOrFail($category->id);
-        
         DB::transaction(function() use ($cate){
             return $cate->delete();
         });
-        return response()->json(
-            [
-                "success" => true,
-                "message" => "Category Deleted",
-            ],200
-        );
+        return $this->successMessage("Category Deleted");
     }
 }

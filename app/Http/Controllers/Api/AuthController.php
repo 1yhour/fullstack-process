@@ -15,8 +15,11 @@ use App\Http\Resources\UserResource;
 use App\Http\Requests\LoginRequest;
 use App\Events\UserNotify;
 use App\Models\Product;
+use App\Traits\ApiResponseTrait;
+
 class AuthController extends Controller
 {
+    use ApiResponseTrait;
     public function register(RegisterRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -27,12 +30,7 @@ class AuthController extends Controller
         $welcomeCoupon = Product::where('name', 'Welcome Coupon')->first();
         UserNotify::dispatch($user, $welcomeCoupon);
         $token = JWTAuth::fromUser($user);
-        return response()->json([
-            "success"=> true,
-            "message"=> "Successfully register",
-            "data"=> new UserResource($user),
-            "token"=> $token
-        ], 201);
+        return $this->successResponse("Successfully register", new UserResource($user), $token, 201);
     } 
     
     public function login(LoginRequest $request): JsonResponse
@@ -40,48 +38,28 @@ class AuthController extends Controller
         $credentials = $request->validated();
         $guard = auth('api');
         if(!$token = $guard->attempt($credentials)){
-            return response()->json([
-                "success" => false,
-                "message" => "Invalid email or password",
-            ], 401);
+            return $this->errorResponse("Invalid email or password");
         }
-        return response()->json(
-            [
-                "success"=> true,
-                "message"=> "Successfully login",
-                "data"=> [
-                    "user"=>new UserResource($guard->user()),
-                    "access_token" => $token,
-                    "token_type" => "Bearer",
-                ]
-            ]
-        , 200);
+        $data = [
+            "user"=>new UserResource($guard->user()),
+            "access_token" => $token,
+            "token_type" => "Bearer",
+        ];
+        return $this->successResponse("Successfully login", $data);
     }
+
     public function logout(){
         auth()->logout();
-        return response()->json(
-            [
-                "success" => true,
-                "message" => "Successfully logout",
-            ], 200
-        );
+        return $this->successMessage("Successfully logout");
     }
+
     public function me(){
         $user = auth()->user();
-        return response()->json(
-            [
-                "success" => true,
-                "message" => "Successfully get user",
-                "data" => new UserResource($user)
-            ], 200
-        );
+        return $this->successResponse("Successfully get user", new UserResource($user), 200);
     }
+
     public function refresh(){
         $newToken = auth()->refresh();
-        return response()->json([
-            "success" => true,
-            "message" => "Token refreshed successfully",
-            "access_token" => $newToken,
-        ], 200);
+        return $this->successMessage("Token refreshed successfully", 200, $newToken);
     }
 }

@@ -12,21 +12,18 @@ use Illuminate\Support\Facades\Gate;
 use Exception;
 use App\Contracts\Notifier;
 use App\Contracts\SmsNotifier;
+use App\Traits\ApiResponseTrait;
 class ProductController extends Controller
 {
+    use ApiResponseTrait;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $product = Product::latest()->paginate(15);
-        return response()->json(
-            [
-                "success"=> true,
-                "message"=> "Successfully fetched products",
-                "data" => ProductResource::collection($product),
-            ], 200
-        );
+        $productCollection = ProductResource::collection($product);
+        return $this->successResponse("Successfully fetched products", $productCollection);
     }
 
     /**
@@ -39,21 +36,10 @@ class ProductController extends Controller
             $product = DB::transaction(function() use ($validated){
                 return Product::create($validated);
             });
-            return response()->json(
-                [
-                    "success"=> true,
-                    "message"=> "Successfully created product",
-                    "data" => new ProductResource($product)
-                ], 201
-        );
+            return $this->successResponse("Successfully created product", new ProductResource($product), 201);
         }catch(Exception $e){
             Log::error($e->getMessage());
-            return response()->json(
-                [
-                    "success"=> false,
-                    "message"=> "Failed to create product",
-                ], 500
-            );
+            return $this->errorResponse("Failed to create product", 500);
         }
     }
 
@@ -62,13 +48,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return response()->json(
-            [
-                "success" => true,
-                "message" => "Successfully get the products",
-                "data" => new ProductResource($product)
-            ], 200
-        );
+        return $this->successResponse("Successfully get the products", new ProductResource($product));
     }
     /**
      * Update the specified resource in storage.
@@ -109,20 +89,10 @@ class ProductController extends Controller
             DB::transaction(function() use ($product){
                 return $product->delete();
             });
-            return response()->json(
-                [
-                    "success" => true,
-                    "message" => "Successfully deleted the product",
-                ], 200
-            );
+            return $this->successMessage("Successfully deleted the product");
         }catch(Exception $e){
             Log::error($e->getMessage());
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => "Failed to delete the product",
-                ], 500
-            );
+            return $this->errorResponse("Failed to delete the product", 500);
         }
     }
 
@@ -137,13 +107,7 @@ class ProductController extends Controller
         $map = $this->notifier->filterNum($arrNum->toArray());
         Log::info($map);
         Log::info($sum);
-        return response()->json(
-            [
-                "success" => true,
-                "message" => "Successfully get the notifier",
-                "data" => $sum,
-            ], 200
-        );
+        return $this->successResponse("Successfully get the notifier", $sum);
     }
     
 }
