@@ -62,21 +62,10 @@ class ProductController extends Controller
                 return $product->update($validated);
             });
             
-            return response()->json(
-                [
-                    "success" => true,
-                    "message" => "Product Updated",
-                    "data" => new ProductResource($product)
-                ],200
-            );
+            return $this->successResponse("Product Updated", new ProductResource($product));
         }catch(Throwable $e){
             Log::error("Failed to update the product" . $e->getMessage());
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => "Failed to update product",
-                ], 500
-            );
+            return $this->errorResponse("Failed to update product", 500);
         }
     }
 

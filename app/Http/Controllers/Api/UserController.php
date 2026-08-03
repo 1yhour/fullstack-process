@@ -12,20 +12,16 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use App\Traits\ApiResponseTrait;
 class UserController extends Controller
 {
+    use ApiResponseTrait;
 
     public function index()
     {
         Gate::authorize('viewAny', User::class);
         $users = User::latest()->paginate(15);
-        return response()->json(
-            [
-                "success" => true,
-                "message" => "Successfully fetched users",
-                "data" => UserResource::collection($users)
-            ], 200
-        );
+        return $this->successResponse("Successfully fetched users", UserResource::collection($users));
     }
 
     public function store(StoreUserRequest $request)
@@ -40,21 +36,10 @@ class UserController extends Controller
                 Log::info("User created successfully: " . $user->email);
                 return $user;
             });
-            return response()->json(
-                [
-                    "success" => true,
-                    "message" => "Successfully create user",
-                    "data" => new UserResource($user)
-                ], 201
-            );
+            return $this->successResponse("Successfully create user", new UserResource($user), null, 201);
         }catch(\Throwable $e){
             Log::error("Failed to create the user" . $e->getMessage());
-            return response()->json(
-                [
-                    "success" => false,
-                    "message" => "Internal server error",
-                ], 500
-            );
+            return $this->errorResponse("Internal server error", 500);
         }
     }
 
@@ -64,13 +49,7 @@ class UserController extends Controller
     public function show(User $user)
     {
         Gate::authorize('view', $user);
-        return response()->json(
-            [
-                "success" => true,
-                "message" => "Successful Get User",
-                "data" => new UserResource($user)
-            ], 200
-        );
+        return $this->successResponse("Successful Get User", new UserResource($user));
     }
     /**
      * Update the specified resource in storage.
@@ -84,13 +63,7 @@ class UserController extends Controller
         });
         $user->update($validated);
         
-        return response()->json(
-            [
-                "success" => true,
-                "message" => "Successfully updated the user",
-                "data" => new UserResource($user)
-            ], 200
-        );
+        return $this->successResponse("Successfully updated the user", new UserResource($user));
     }
 
     /**
@@ -100,11 +73,6 @@ class UserController extends Controller
     {
         Gate::authorize('delete', $user);
         $user->delete();
-        return response()->json(
-            [
-                "success" => true,
-                "message" => "Successfully deleted",
-            ], 200
-        );
+        return $this->successMessage("Successfully deleted");
     }
 }
