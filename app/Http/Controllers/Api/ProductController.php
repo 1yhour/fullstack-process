@@ -90,8 +90,8 @@ class ProductController extends Controller
     public function getNotifier()
     {   
         $arrNum = collect([1,3,3,6,3,5,7,99,0,5,14,22]);
-        $this->notifier->send("helo");
-        $this->smsNotifier->sendSms('hello world');
+        $this->notifier->sendSms("helo");
+        // $this->smsNotifier->sendSms('hello world');
         $sum = $this->notifier->calculateSum(1,2);
         $map = $this->notifier->filterNum($arrNum->toArray());
         Log::info($map);

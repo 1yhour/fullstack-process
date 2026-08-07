@@ -6,21 +6,22 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Contracts\SmsNotifier;
 use App\Events\UserRegistered;
+use App\Facade\Notify;
 class SendWelcomeSms
 {
     /**
      * Create the event listener.
      */
-    public function __construct(public SmsNotifier $sms)
-    {
-        //
-    }
+    // public function __construct(public SmsNotifier $sms)
+    // {
+    //     //
+    // }
 
     /**
      * Handle the event.
      */
     public function handle(UserRegistered $event): void
     {
-        $this->sms->sendSms($event->user);
+        Notify::sendSms($event->user);
     }
 }
